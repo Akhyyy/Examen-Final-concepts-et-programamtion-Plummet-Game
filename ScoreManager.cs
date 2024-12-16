@@ -1,11 +1,11 @@
-//la classe singleton ScoreManager
+//la classe singleton ScoreManager Question2
 using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance { get; private set; }
 
-    private int initialEnergy = 1000; // Barre d’énergie initiale
+    private int initialEnergy = 1000; // Barre dâ€™Ã©nergie initiale
     private int currentEnergy;
     private int collisions;
     private int wallsDestroyed;
@@ -20,7 +20,7 @@ public class ScoreManager : MonoBehaviour
         else
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persiste entre les scènes si nécessaire
+            DontDestroyOnLoad(gameObject); // Persiste entre les scÃ¨nes si nÃ©cessaire
         }
     }
 
@@ -35,7 +35,7 @@ public class ScoreManager : MonoBehaviour
     public void RegisterCollision()
     {
         collisions++;
-        currentEnergy -= 100; // Diminue l'énergie par collision
+        currentEnergy -= 100; // Diminue l'Ã©nergie par collision
         if (currentEnergy < 0) currentEnergy = 0;
     }
 
@@ -61,7 +61,7 @@ public class ScoreManager : MonoBehaviour
 
     public int CalculateFinalScore()
     {
-        // Exemple : score sur l'energie restant, les murs détruits et les collisions
+        // Exemple : score sur l'energie restant, les murs dÃ©truits et les collisions
         return (currentEnergy * 2) - (collisions * 10) + (GetRemainingWalls() * 5);
     }
 
