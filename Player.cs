@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     private bool _isGameOver;
 
     // Question 6 : Mode IA - Attributs pour activer le mode IA
+    private bool isAIEnabled = true; // Active le mode IA par défaut
     private List<Vector2> path; // Chemin de Djikstra
     private int currentPathIndex; 
     private float pathRecalculationTime = 1f; // Fréquence de recalcul du chemin
@@ -70,95 +71,111 @@ public class Player : MonoBehaviour
     void CalculatePath()
     {
         if (Time.time - lastPathCalculationTime < pathRecalculationTime)
-            return;
+        return;
 
         lastPathCalculationTime = Time.time;
+
+        // Position actuelle du joueur
         Vector2 startPos = transform.position;
-        
+
+        // Cible avec un décalage vertical pour éviter les obstacles
         float verticalOffset = Random.Range(-2f, 2f);
         Vector2 targetPos = new Vector2(25f, transform.position.y + verticalOffset);
 
+        // Calcul du chemin avec l'algorithme de Djikstra
         path = Dijkstra.FindPath(startPos, targetPos, stuckCounter);
         currentPathIndex = 0;
-        stuckCounter = 0; // Réinitialise le compteur de blocages
+        stuckCounter = 0; // Réinitialise le compteur de blocage
+    
     }
 
     void CheckIfStuck()
     {
         if (Time.time - lastStuckCheckTime < stuckCheckTime)
-            return;
+        return;
 
-        float distanceMoved = Vector2.Distance(transform.position, lastPosition);
-        if (distanceMoved < 0.1f && !_isGameOver)
+       // Vérifie si le joueur a parcouru une distance suffisante
+       float distanceMoved = Vector2.Distance(transform.position, lastPosition);
+       if (distanceMoved < 0.1f && !_isGameOver)
+    {
+        stuckCounter++;
+        if (stuckCounter > 3) // Si le joueur est bloqué trop longtemps
         {
-            stuckCounter++;
-            if (stuckCounter > 3)
-            {
-                BacktrackAndFindNewPath();
-            }
+            BacktrackAndFindNewPath();
         }
+    }
         else
-        {
-            stuckCounter = 0;
-        }
+    {
+        stuckCounter = 0; // Réinitialise le compteur si le joueur bouge
+    }
 
         lastPosition = transform.position;
         lastStuckCheckTime = Time.time;
+    
     }
 
-    void BacktrackAndFindNewPath()
+        void BacktrackAndFindNewPath()
     {
+        // Recule le joueur pour essayer un nouveau chemin
         Vector2 backtrackPosition = transform.position;
         backtrackPosition.x -= backtrackDistance;
         transform.position = backtrackPosition;
 
+        // Efface le chemin actuel et force un recalcul
         path.Clear();
         currentPathIndex = 0;
-        lastPathCalculationTime = 0f;
+        lastPathCalculationTime = 0f; // Force un recalcul immédiat
         CalculatePath();
     }
 
     void Update()
     {
-        if (!_isGameOver)
+       if (!_isGameOver)
+    {
+        if (isAIEnabled)
         {
+            // Si le mode IA est activé, gérer les déplacements automatiques
+            UpdateAIMovement();
+            CheckIfStuck(); // Vérifie si le joueur est bloqué
+        }
+        else
+        {
+            // Sinon, déplacements manuels contrôlés par le joueur
             float h = Input.GetAxis("Horizontal");
             float v = Input.GetAxis("Vertical");
             movement = new Vector2(h * speed, v * speed);
-
-            // Ajout du mode IA
-            /* if (isAIEnabled)
-            {
-                UpdateAIMovement();
-                CheckIfStuck();
-            } */
         }
+    }
+    
     }
 
     void UpdateAIMovement()
     {
         if (path == null || path.Count == 0 || currentPathIndex >= path.Count)
+    {
+        CalculatePath(); // Recalcule un chemin si le précédent est terminé ou inexistant
+        return;
+    }
+
+    // Cible actuelle sur le chemin
+    Vector2 currentTarget = path[currentPathIndex];
+    Vector2 currentPosition = transform.position;
+    Vector2 direction = (currentTarget - currentPosition);
+    float distance = direction.magnitude;
+
+    // Si le joueur atteint la cible actuelle, passer à la suivante
+    if (distance < 0.1f)
+    {
+        currentPathIndex++;
+        if (currentPathIndex >= path.Count)
         {
-            CalculatePath();
+            CalculatePath(); // Recalcule le chemin si toutes les cibles sont atteintes
             return;
         }
+    }
 
-        Vector2 currentTarget = path[currentPathIndex];
-        Vector2 currentPosition = transform.position;
-        Vector2 direction = (currentTarget - currentPosition);
-        float distance = direction.magnitude;
-
-        if (distance < 0.1f)
-        {
-            currentPathIndex++;
-            if (currentPathIndex >= path.Count)
-            {
-                CalculatePath();
-                return;
-            }
-        }
-
-        movement = direction.normalized * speed;
+    // Déplacement vers la cible actuelle
+    movement = direction.normalized * speed;
     }
 
     void FixedUpdate()
