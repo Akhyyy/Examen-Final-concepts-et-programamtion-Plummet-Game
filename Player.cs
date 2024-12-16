@@ -168,7 +168,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    //methode qui s'execute lorsque il y a collision
+    //methode qui s'execute lorsque il y a collision, lien avec ScoreManager Question2
     void OnCollisionEnter2D(Collision2D collision)
     {
         playerData.collisions++;
