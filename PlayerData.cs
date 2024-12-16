@@ -11,6 +11,19 @@ public class PlayerData
     public int collisions;
     public int steps;
 
+    //Question5 pour la sauvegarde des scores
+    public string Game { get; set; }
+    public int Score { get; set; }
+    public string Timestamp { get; set; }
+
+    public PlayerData(string game, int score)
+    {
+        Game = game;
+        Score = score;
+        Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+
     public string Stringify() {
         return JsonUtility.ToJson(this);
     }
