@@ -170,15 +170,29 @@ public class Player : MonoBehaviour
 
     }
 
-    //methode qui s'execute lorsque il y a collision, lien avec ScoreManager Question2
+    //methode qui s'execute lorsque il y a collision, lien avec ScoreManager Question2 et Question3 pour calcul et mise a jour des scores
     void OnCollisionEnter2D(Collision2D collision)
     {
         playerData.collisions++;
 
        ScoreManager.Instance.RegisterCollision();
        Debug.Log($"Collisions: {ScoreManager.Instance.GetCollisions()}");
+
+       if (collision.gameObject.CompareTag("Wall"))
+    {
+        ScoreManager.Instance.RegisterCollision();
+    }
        
     }
+
+//Question3 pout calcul et mise a jour des scores
+    void OnDestroy()
+{
+    if (gameObject.CompareTag("Wall"))
+    {
+        ScoreManager.Instance.RegisterWallDestroyed();
+    }
+}
 
     //dessin et coloration des gizmos
     void OnDrawGizmos()
