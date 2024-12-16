@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 public class Player : MonoBehaviour
@@ -9,21 +9,21 @@ public class Player : MonoBehaviour
     private Vector2 movement;
     private PlayerData playerData;
     private bool _isGameOver;
-    
-    // Question 6 : Ajout d'un mode AI  - attribut pour activer le mode AI
 
-    private List<Vector2> path; //chemin de Djikstra
+    // Question 6 : Mode IA - Attributs pour activer le mode IA
+    private List<Vector2> path; // Chemin de Djikstra
     private int currentPathIndex; 
-    private float pathRecalculationTime = 1f; //frequence de recalcul du chemin
-    private float lastPathCalculationTime; //duree de calcul du chemin
-    private float stuckCheckTime = 3.5f; //frequence de detection de chemin bloque
-    private float lastStuckCheckTime; //derniere fois ou la detection de chemin bloque a ete faite
-    private Vector2 lastPosition; //derniere position du joueur
-    private int stuckCounter = 0; //nombre de fois ou le chemin est bloque
-    private float backtrackDistance = 2f; // distance de recul pour essayer un nouveau chemin
+    private float pathRecalculationTime = 1f; // Fréquence de recalcul du chemin
+    private float lastPathCalculationTime; // Dernière fois où le chemin a été calculé
+    private float stuckCheckTime = 3.5f; // Fréquence de détection de chemin bloqué
+    private float lastStuckCheckTime; // Dernière détection de chemin bloqué
+    private Vector2 lastPosition; // Dernière position du joueur
+    private int stuckCounter = 0; // Nombre de fois où le chemin est bloqué
+    private float backtrackDistance = 2f; // Distance de recul pour essayer un nouveau chemin
 
-    //Question 4 : Gestion de l'évènement fin du jeu
-    
+    // Question 4 : Gestion de l'événement de fin du jeu
+    public static event System.Action OnGameOver;
+
     void Start()
     {
         _isGameOver = false;
@@ -32,13 +32,33 @@ public class Player : MonoBehaviour
         playerData.plummie_tag = "nraboy";
         path = new List<Vector2>();
         lastPosition = transform.position;
-        // Question 6 : Ajout d'un mode AI  - calcul du chemin
-        // rajouter l'appel de fonction requis
 
-        //Question 4 : Gestion de l'évènement fin du jeu
+        // Question 4 : Gestion de l'événement
+        if (OnGameOver != null)
+            OnGameOver += HandleGameOver; // Abonnement à l'événement
     }
 
-    //methode qui calcule le chemin a prendre en Mode AI
+    void OnDestroy()
+    {
+        if (OnGameOver != null)
+            OnGameOver -= HandleGameOver; // Désabonnement à l'événement
+    }
+
+    // Gestion de l'événement de fin de jeu
+    private void HandleGameOver()
+    {
+        _isGameOver = true;
+        Debug.Log("Game Over! The game will restart.");
+        // Ici, vous pouvez ajouter un délai ou des effets avant le redémarrage
+        RestartGame();
+    }
+
+    private void RestartGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    // Méthode qui calcule le chemin à prendre en Mode AI
     void CalculatePath()
     {
         if (Time.time - lastPathCalculationTime < pathRecalculationTime)
@@ -47,16 +67,14 @@ public class Player : MonoBehaviour
         lastPathCalculationTime = Time.time;
         Vector2 startPos = transform.position;
         
-        // Add random vertical offset to try different paths
         float verticalOffset = Random.Range(-2f, 2f);
         Vector2 targetPos = new Vector2(25f, transform.position.y + verticalOffset);
-        
+
         path = Dijkstra.FindPath(startPos, targetPos, stuckCounter);
         currentPathIndex = 0;
-        stuckCounter = 0; // Reset stuck counter when finding new path
+        stuckCounter = 0; // Réinitialise le compteur de blocages
     }
 
-    //methode pour verifier si le joueur est bloque en mode AI
     void CheckIfStuck()
     {
         if (Time.time - lastStuckCheckTime < stuckCheckTime)
@@ -66,7 +84,7 @@ public class Player : MonoBehaviour
         if (distanceMoved < 0.1f && !_isGameOver)
         {
             stuckCounter++;
-            if (stuckCounter > 3) // If stuck for too long
+            if (stuckCounter > 3)
             {
                 BacktrackAndFindNewPath();
             }
@@ -80,52 +98,35 @@ public class Player : MonoBehaviour
         lastStuckCheckTime = Time.time;
     }
 
-    //retour en arriere et recherche d'un nouveau chemin
     void BacktrackAndFindNewPath()
     {
-        // le mode AI fait reculer le joueur
         Vector2 backtrackPosition = transform.position;
         backtrackPosition.x -= backtrackDistance;
         transform.position = backtrackPosition;
 
-        // le chemin actuel est efface et un nouveau chemin est recalcule
         path.Clear();
         currentPathIndex = 0;
-        lastPathCalculationTime = 0f; // met a 0 le delai de temps pour le calcul du chemin
+        lastPathCalculationTime = 0f;
         CalculatePath();
     }
 
     void Update()
     {
-        //Question 3: Calcul et mise à jour des scores 
-
         if (!_isGameOver)
         {
-            //introduire le mode AI dans cette fonction
-            //si le jeu est en mode AI alors le AI controlle le mouvement 
-            //sinon le joueur peut controller le mouvement
-
             float h = Input.GetAxis("Horizontal");
             float v = Input.GetAxis("Vertical");
             movement = new Vector2(h * speed, v * speed);
 
-           
-            //Question 6 - Mode AI
-            /*if (!...)
-            {
-                
-            }
-            else
+            // Ajout du mode IA
+            /* if (isAIEnabled)
             {
                 UpdateAIMovement();
                 CheckIfStuck();
-            }*/
+            } */
         }
-
-        //Question 5 : Sauvegarde de la progression du jeu 
     }
 
-    //mouvement automatique controlle par le mode AI
     void UpdateAIMovement()
     {
         if (path == null || path.Count == 0 || currentPathIndex >= path.Count)
@@ -151,50 +152,51 @@ public class Player : MonoBehaviour
 
         movement = direction.normalized * speed;
     }
-    
-    //verification du progres du joueur
+
     void FixedUpdate()
     {
         if (!_isGameOver)
         {
             Vector2 newPosition = rigidBody2D.position + movement * Time.fixedDeltaTime;
             rigidBody2D.MovePosition(newPosition);
+
+            // Détection de fin du jeu : ligne d'arrivée ou énergie à 0
+            if (rigidBody2D.position.x > 24.0f)
+            {
+                _isGameOver = true;
+                Debug.Log("Reached the finish line!");
+                ScoreManager.Instance.DisplayScore();
+                OnGameOver?.Invoke(); // Déclenche l'événement
+            }
         }
-
-        if (rigidBody2D.position.x > 24.0f && !_isGameOver)
-{
-    _isGameOver = true;
-    Debug.Log("Reached the finish line!");
-    ScoreManager.Instance.DisplayScore(); // Affiche les scores, lien avec le ScoreManager Question2
-}
-
     }
 
-    //methode qui s'execute lorsque il y a collision, lien avec ScoreManager Question2 et Question3 pour calcul et mise a jour des scores
     void OnCollisionEnter2D(Collision2D collision)
     {
         playerData.collisions++;
-
-       ScoreManager.Instance.RegisterCollision();
-       Debug.Log($"Collisions: {ScoreManager.Instance.GetCollisions()}");
-
-       if (collision.gameObject.CompareTag("Wall"))
-    {
         ScoreManager.Instance.RegisterCollision();
-    }
-       
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            ScoreManager.Instance.RegisterCollision();
+        }
+
+        if (ScoreManager.Instance.GetCurrentEnergy() <= 0)
+        {
+            _isGameOver = true;
+            Debug.Log("Energy depleted!");
+            OnGameOver?.Invoke(); // Déclenche l'événement
+        }
     }
 
-//Question3 pout calcul et mise a jour des scores
     void OnDestroy()
-{
-    if (gameObject.CompareTag("Wall"))
     {
-        ScoreManager.Instance.RegisterWallDestroyed();
+        if (gameObject.CompareTag("Wall"))
+        {
+            ScoreManager.Instance.RegisterWallDestroyed();
+        }
     }
-}
 
-    //dessin et coloration des gizmos
     void OnDrawGizmos()
     {
         if (path != null && path.Count > 0)
@@ -206,6 +208,4 @@ public class Player : MonoBehaviour
             }
         }
     }
-
-    //Question 4 : Gestion de l'évènement fin du jeu
 }
