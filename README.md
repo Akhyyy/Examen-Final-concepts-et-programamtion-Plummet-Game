@@ -22,3 +22,10 @@ Fonctionnalités principales éviter les obstacles.
 | **DoorManager**   | Initialise et gère toutes les portes d'un niveau. Définit aléatoirement quelles portes sont fausses. |
 | **PlayerData**    | Stocke les informations relatives au joueur (collisions, énergie restante, etc.). Sauvegarde et charge les données du joueur. |
 
+### Système de score avec affichage en temps réel
+Un système de score a été ajouté pour suivre les progrès du joueur en fonction de l’énergie restante, du nombre de collisions et du nombre de murs détruits. Ce système affiche les informations sur le score en temps réel dans l'interface utilisateur du jeu.
+
+#### Détails de fonctionnement :
+- Le score est calculé en fonction de l'énergie restante, des collisions subies et des murs détruits.
+- L'affichage est mis à jour automatiquement après chaque collision ou destruction de mur.
+- Le score est affiché en haut de l'écran à l'aide d'un élément de texte UI.
