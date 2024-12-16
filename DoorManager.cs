@@ -10,16 +10,22 @@ public class DoorManager : MonoBehaviour
     public int fakeDoorCount;
 
     void Start()
+{
+    _randomDoors = new List<int>();
+    _doorCount = transform.childCount;
+
+    // Initialize ScoreManager, lien avec ScoreManager Question2
+    ScoreManager.Instance.Initialize(_doorCount);
+
+    for (int i = 0; i < fakeDoorCount; i++)
     {
-        _randomDoors = new List<int>();
-        _doorCount = transform.childCount;
-        for(int i = 0; i < fakeDoorCount; i++) {
-            _randomDoors.Add(Random.Range(0, _doorCount));
-        }
-        for(int i = 0; i < _doorCount; i++) {
-            GameObject doorGameObject = transform.GetChild(i).gameObject;
-            doorGameObject.GetComponent<Door>().SetIsFakeDoor(_randomDoors.Contains(i));
-        }
+        _randomDoors.Add(Random.Range(0, _doorCount));
     }
+    for (int i = 0; i < _doorCount; i++)
+    {
+        GameObject doorGameObject = transform.GetChild(i).gameObject;
+        doorGameObject.GetComponent<Door>().SetIsFakeDoor(_randomDoors.Contains(i));
+    }
+}
 
 }
