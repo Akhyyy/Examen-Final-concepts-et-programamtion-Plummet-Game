@@ -173,20 +173,9 @@ public class Player : MonoBehaviour
     {
         playerData.collisions++;
 
-        // Question 6 : Ajout d'un mode AI  - verifie si on est bloque apres une collision
-        // corriger pour faire fonctionner le mode AI
-       /*if (...)
-        {
-            stuckCounter++; // incremente le compteur de detection lorsque le joueur est bloque
-            if (stuckCounter > 2) // si il y a trop de collisions alors le jouur est bloque
-            {
-                BacktrackAndFindNewPath();
-            }
-            else
-            {
-                CalculatePath();
-            }
-        }*/
+       ScoreManager.Instance.RegisterCollision();
+       Debug.Log($"Collisions: {ScoreManager.Instance.GetCollisions()}");
+       
     }
 
     //dessin et coloration des gizmos
