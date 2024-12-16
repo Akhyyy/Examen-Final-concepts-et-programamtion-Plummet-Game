@@ -1,4 +1,7 @@
 using UnityEngine;
+using MongoDB.Driver;
+using MongoDB.Bson;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 public class Player : MonoBehaviour
@@ -23,6 +26,11 @@ public class Player : MonoBehaviour
 
     // Question 4 : Gestion de l'événement de fin du jeu
     public static event System.Action OnGameOver;
+
+    //Question5 sur la sauvegarde du score
+    private string connectionString = "your-mongodb-atlas-connection-string"; // Remplacez par votre chaîne de connexion
+    private string databaseName = "game_database";
+    private string collectionName = "progression";
 
     void Start()
     {
@@ -168,6 +176,34 @@ public class Player : MonoBehaviour
                 ScoreManager.Instance.DisplayScore();
                 OnGameOver?.Invoke(); // Déclenche l'événement
             }
+        }
+    }
+
+    //Question5 sur la sauvegarde score
+    async void SaveProgressionAsync(int finalScore)
+    {
+        try
+        {
+            // Connexion à la base de données MongoDB Atlas
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            var collection = database.GetCollection<BsonDocument>(collectionName);
+
+            // Création du document JSON pour la sauvegarde
+            var progressionDocument = new BsonDocument
+            {
+                { "game", "NomPrenomEtudiant_fall_guy" }, // Remplacez par votre nom et prénom
+                { "score", finalScore },
+                { "timestamp", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
+            };
+
+            // Sauvegarde asynchrone avec await
+            await collection.InsertOneAsync(progressionDocument);
+            Debug.Log("Progression saved successfully in MongoDB.");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Failed to save progression: {ex.Message}");
         }
     }
 
