@@ -29,3 +29,10 @@ Un système de score a été ajouté pour suivre les progrès du joueur en fonct
 - Le score est calculé en fonction de l'énergie restante, des collisions subies et des murs détruits.
 - L'affichage est mis à jour automatiquement après chaque collision ou destruction de mur.
 - Le score est affiché en haut de l'écran à l'aide d'un élément de texte UI.
+
+### Gestion de la fin du jeu avec événements
+Un système d'événements a été mis en place pour gérer la fin du jeu. L'événement `OnGameOver` est déclenché dans deux cas :
+1. Lorsque l'énergie du joueur atteint 0.
+2. Lorsque le joueur franchit la ligne d'arrivée.
+
+L'événement déclenche la fonction `RestartGame` qui recharge la scène pour recommencer le jeu. La fonction `PlayerCrossedFlags` est utilisée pour détecter si la ligne d'arrivée a été franchie. Les événements sont abonnés et désabonnés dans le script `GameManager` avec les syntaxes `+=` et `-=` pour assurer une gestion propre des événements.
