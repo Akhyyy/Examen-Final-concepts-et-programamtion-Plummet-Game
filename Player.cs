@@ -161,11 +161,13 @@ public class Player : MonoBehaviour
             rigidBody2D.MovePosition(newPosition);
         }
 
-        if (rigidBody2D.position.x > 24.0f && _isGameOver == false)
-        {
-            _isGameOver = true;
-            Debug.Log("Reached the finish line!");
-        }
+        if (rigidBody2D.position.x > 24.0f && !_isGameOver)
+{
+    _isGameOver = true;
+    Debug.Log("Reached the finish line!");
+    ScoreManager.Instance.DisplayScore(); // Affiche les scores, lien avec le ScoreManager Question2
+}
+
     }
 
     //methode qui s'execute lorsque il y a collision, lien avec ScoreManager Question2
